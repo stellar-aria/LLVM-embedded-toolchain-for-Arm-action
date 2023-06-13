@@ -53,7 +53,7 @@ jobs:
       matrix:
         llvm: ['13', 'latest']
     steps:
-      - name: Install GNU Arm Embedded Toolchain - ${{ matrix.llvm }}
+      - name: Install LLVM Embedded Toolchain for Arm - ${{ matrix.llvm }}
         uses: stellar-aria/llvm-embedded-toolchain-for-arm-action@latest
         with:
           release: ${{ matrix.llvm }}

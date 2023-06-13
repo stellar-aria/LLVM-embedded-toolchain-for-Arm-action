@@ -20,9 +20,9 @@
   },
   "keywords": [
     "actions",
-    "gcc",
+    "llvm",
     "arm",
-    "arm-none-eabi-gcc"
+    "armclang"
   ],
   "author": "Katherine Whitlock",
   "license": "MIT",
