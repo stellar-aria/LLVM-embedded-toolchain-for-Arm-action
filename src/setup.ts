@@ -5,23 +5,21 @@ import * as path from 'path';
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import * as cache from '@actions/cache';
-import md5File from 'md5-file';
+import sha256File from 'sha256-file';
 
-import * as gcc from './gcc';
+import * as llvm from './llvm';
 
 export async function install(release: string, platform: string): Promise<string> {
-  const toolName = 'gcc-arm-none-eabi';
+  const toolName = 'llvm-embedded-toolchain-for-arm';
 
-  // Get the GCC release info
-  const distData = gcc.distributionUrl(release, platform);
+  // Get the LLVM release info
+  const distUrl: string = llvm.distributionUrl(release, platform);
 
-  // Convert the GCC version to Semver so that it can be used with the GH cache
-  const toolVersion = gcc.gccVersionToSemver(release);
-  const cacheKey = `${toolName}-${toolVersion}-${platform}`;
+  const cacheKey = `${toolName}-${release}-${platform}`;
   const installPath = path.join(os.homedir(), cacheKey);
   core.debug(`Cache key: ${cacheKey}`);
 
-  // Try to load the GCC installation from the cache
+  // Try to load the LLVM installation from the cache
   let cacheKeyMatched: string | undefined = undefined;
   try {
     cacheKeyMatched = await cache.restoreCache([installPath], cacheKey);
@@ -31,46 +29,54 @@ export async function install(release: string, platform: string): Promise<string
   }
   if (cacheKeyMatched === cacheKey) {
     core.info(`Cache found: ${installPath}`);
-    let cacheMd5 = 'MD5 not found in cached installation';
-    try {
-      cacheMd5 = await fs.promises.readFile(path.join(installPath, 'md5.txt'), {encoding: 'utf8'});
-    } catch (err) {
-      core.warning(`⚠️ Could not read the contents of the cached GCC version MD5.\n${err.message}`);
-    }
-    core.info(`Cached version MD5: ${cacheMd5}`);
-    if (cacheMd5 !== distData.md5) {
-      core.warning(`⚠️ Cached version MD5 does not match: ${cacheMd5} != ${distData.md5}`);
-    } else {
-      core.info('Cached version loaded.');
-      return installPath;
+    if (llvm.hasSHA256(release)) {
+      const distHash = await llvm.getSHA256(release, platform);
+
+      let cacheSHA256 = 'SHA256 not found in cached installation';
+      try {
+        cacheSHA256 = await fs.promises.readFile(path.join(installPath, 'sha256.txt'), {encoding: 'utf8'});
+      } catch (err) {
+        core.warning(`⚠️ Could not read the contents of the cached LLVM version SHA256.\n${err.message}`);
+      }
+      core.info(`Cached version SHA256: ${cacheSHA256}`);
+      if (cacheSHA256 !== distHash) {
+        core.warning(`⚠️ Cached version SHA256 does not match: ${cacheSHA256} != ${distHash}`);
+      } else {
+        core.info('Cached version loaded.');
+        return installPath;
+      }
     }
   }
 
-  core.info(`Cache miss, downloading GCC ${release} from ${distData.url} ; MD5 ${distData.md5}`);
-  const gccDownloadPath = await tc.downloadTool(distData.url);
+  core.info(`Cache miss, downloading LLVM ${release} from ${distUrl}`);
+  const llvmDownloadPath = await tc.downloadTool(distUrl);
 
-  core.info(`GCC release downloaded, calculating MD5...`);
-  const downloadHash = await md5File(gccDownloadPath);
-  core.info(`Downloaded file MD5: ${downloadHash}`);
-  if (distData.md5 && downloadHash !== distData.md5) {
-    throw new Error(`Downloaded GCC MD5 doesn't match expected value: ${downloadHash} != ${distData.md5}`);
+  core.info(`LLVM release downloaded, calculating SHA256...`);
+  const downloadHash: string = sha256File(llvmDownloadPath);
+
+  core.info(`Downloaded file SHA256: ${downloadHash}`);
+  if (llvm.hasSHA256(release)) {
+    const distHash: string = await llvm.getSHA256(release, platform);
+    if (downloadHash !== distHash) {
+      throw new Error(
+        `Downloaded LLVM SHA256 doesn't match expected value: ${downloadHash} != ${distHash}, lengths: ${downloadHash.length}, ${distHash.length}`
+      );
+    }
   }
 
-  core.info(`Extracting ${gccDownloadPath}`);
+  core.info(`Extracting ${llvmDownloadPath}`);
   let extractedPath = '';
-  if (distData.url.endsWith('.zip')) {
-    extractedPath = await tc.extractZip(gccDownloadPath, installPath);
-  } else if (distData.url.endsWith('.tar.bz2')) {
-    extractedPath = await tc.extractTar(gccDownloadPath, installPath, 'xj');
-  } else if (distData.url.endsWith('.tar.xz')) {
-    extractedPath = await tc.extractTar(gccDownloadPath, installPath, 'xJ');
+  if (distUrl.endsWith('.zip')) {
+    extractedPath = await tc.extractZip(llvmDownloadPath, installPath);
+  } else if (distUrl.endsWith('.tar.gz')) {
+    extractedPath = await tc.extractTar(llvmDownloadPath, installPath);
   } else {
-    throw new Error(`Can't decompress ${distData.url}`);
+    throw new Error(`Can't decompress ${distUrl}`);
   }
 
   // Adding installation to the cache
   core.info(`Adding to cache: ${extractedPath}`);
-  await fs.promises.writeFile(path.join(extractedPath, 'md5.txt'), downloadHash, {encoding: 'utf8'});
+  await fs.promises.writeFile(path.join(extractedPath, 'sha256.txt'), downloadHash, {encoding: 'utf8'});
   try {
     await cache.saveCache([extractedPath], cacheKey);
   } catch (err) {
@@ -80,7 +86,7 @@ export async function install(release: string, platform: string): Promise<string
   return extractedPath;
 }
 
-function findGccRecursive(dir: string, executableName: string): string {
+function findRecursive(dir: string, executableName: string): string {
   const entries = fs.readdirSync(dir);
   for (const name of entries) {
     if (name === executableName) {
@@ -89,7 +95,7 @@ function findGccRecursive(dir: string, executableName: string): string {
     const p = path.join(dir, name);
     const st = fs.lstatSync(p);
     if (st.isDirectory()) {
-      const result = findGccRecursive(p, executableName);
+      const result = findRecursive(p, executableName);
       if (result !== '') {
         return result;
       }
@@ -98,7 +104,7 @@ function findGccRecursive(dir: string, executableName: string): string {
   return '';
 }
 
-export function findGcc(root: string, platform?: string): string {
+export function findClang(root: string, platform?: string): string {
   platform = platform || process.platform;
-  return findGccRecursive(root, `arm-none-eabi-gcc${platform === 'win32' ? '.exe' : ''}`);
+  return findRecursive(root, `clang${platform === 'win32' ? '.exe' : ''}`);
 }

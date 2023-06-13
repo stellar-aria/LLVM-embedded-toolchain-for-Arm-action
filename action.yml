@@ -1,20 +1,25 @@
-name: 'arm-none-eabi-gcc GNU Arm Embedded Toolchain'
-description: 'Install and set up the arm-none-eabi-gcc Arm compiler.'
-author: 'Carlos Pereira Atencio'
+name: 'LLVM Embedded Toolchain for Arm'
+description: 'Install and set up the LLVM Embedded Toolchain for Arm (clang).'
+author: 'Katherine Whitlock'
 inputs:
   release:
-    description: 'GNU Embedded Toolchain for Arm release name (e.g. "10.3-2021.07").'
+    description: 'LLVM Embedded Toolchain for Arm release name (e.g. "16.0.0").'
     default: 'latest'
     required: false
   path-env-var:
-    description: 'Name for an environmental variable to be created with the toolchain path.'
+    description: 'Name for an environmental variable to be created with the toolchain /bin path (for executables).'
     required: false
+  toolchain-env-var:
+    description: 'Name for an environmental variable to be created with the toolchain path.'
+    required: false    
 outputs:
   path:
     description: 'Path to the bin folder with the toolchain executables.'
+  toolchain:
+    description: 'Path to the main toolchain folder'
 runs:
   using: 'node16'
   main: 'dist/index.js'
 branding:
   icon: 'cpu'
-  color: 'blue'
+  color: 'gray-dark'

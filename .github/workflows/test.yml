@@ -18,7 +18,7 @@ jobs:
     - run: npm install
     - run: npm run all
 
-  # Run this Action with all GCC versions, in all OS, and build a simple STM32 project
+  # Run this Action with all functioning LLVM versions, in all OS, and build a simple STM32 project
   test-all-releases:
     strategy:
       fail-fast: false
@@ -26,67 +26,35 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
         release:
           - 'latest'
-          - '12.2.Rel1'
-          - '11.3.Rel1'
-          - '11.2-2022.02'
-          - '10.3-2021.10'
-          - '10.3-2021.07'
-          - '10-2020-q4'
-          - '9-2020-q2'
-          - '9-2019-q4'
-          - '8-2019-q3'
-          - '8-2018-q4'
-          - '7-2018-q2'
-          - '7-2017-q4'
-          - '6-2017-q2'
-          - '6-2017-q1'
-          - '6-2016-q4'
-          - '5-2016-q3'
-          - '5-2016-q2'
-          - '5-2016-q1'
-          - '5-2015-q4'
-          - '4.9-2015-q3'
-          - '4.9-2015-q2'
-          - '4.9-2015-q1'
-          - '4.9-2014-q4'
-          - '4.8-2014-q3'
-          - '4.8-2014-q2'
-          - '4.8-2014-q1'
-          - '4.7-2014-q2'
-          - '4.8-2013-q4'
-          - '4.7-2013-q3'
-          - '4.7-2013-q2'
-          - '4.7-2013-q1'
+          - '16.0.0'
     name: Test ${{ matrix.release }} @ ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
     - name: Ensure the compiler is not present (Unix)
       if: runner.os != 'Windows'
-      run: '! arm-none-eabi-gcc --version'
-    - name: Set up GCC Arm Compiler
+      run: '! clang --version'
+    - name: Set up LLVM Embedded Toolchain for Arm
       uses: ./
       with:
         release: ${{ matrix.release }}
     - name: Print out programs invoked by the compiler
-      run: arm-none-eabi-gcc -v
+      run: clang -v
     - name: Print out version
-      run: arm-none-eabi-gcc --version
+      run: clang --version
     - name: Check the version matches
-      if: |
-        (!contains(matrix.release, '2013') && !contains(matrix.release, '2014')
-         && !contains(matrix.release, '2015') && !contains(matrix.release, '2016')
-         && (matrix.release != 'latest'))
-      run: arm-none-eabi-gcc --version | grep -q ${{ matrix.release }}
-    - name: Clone STM32 project
-      uses: actions/checkout@v3
-      with:
-        repository: 'trebisky/stm32f103'
-        ref: 7cfe5feaf02c653352331374d2ad178eb04efde7
-        path: 'stm32f103/'
-    - name: Build simple blinky project
-      working-directory: ./stm32f103/blink1/
-      run: make all
+      if: matrix.release != 'latest'
+      run: clang --version | grep -q ${{ matrix.release }}
+# TODO: get a compiling example
+    # - name: Clone STM32 project
+    #   uses: actions/checkout@v3
+    #   with:
+    #     repository: 'trebisky/stm32f103'
+    #     ref: 7cfe5feaf02c653352331374d2ad178eb04efde7
+    #     path: 'stm32f103/'
+    # - name: Build simple blinky project
+    #   working-directory: ./stm32f103/blink1/
+    #   run: make all
 
   # Check Action env var path
   test-exports:
@@ -95,23 +63,31 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Ensure the compiler is not present
-      run: '! arm-none-eabi-gcc --version'
-    - name: Set up GCC Arm Compiler with environmental variable
+      run: '! clang --version'
+    - name: Set up LLVM Embedded Toolchain for Arm with environmental variable
       id: action-under-test-id
       uses: ./
       with:
-        release: '7-2017-q4'
-        path-env-var: ARM_NONE_EABI_GCC_PATH
+        release: '16.0.0'
+        path-env-var: LLVM_ARM_PATH
+        toolchain-env-var: LLVM_ARM_TOOLCHAIN
     - name: Print out version
-      run: arm-none-eabi-gcc --version
+      run: clang --version
     - name: Check the version matches
-      run: arm-none-eabi-gcc --version | grep -q 7-2017-q4
+      run: clang --version | grep -q 16.0.0
     - name: Print path via env var and output
-      run: echo "output -> ${{ steps.action-under-test-id.outputs.path }} \n env var -> $ARM_NONE_EABI_GCC_PATH"
+      run: |
+        echo "outputs.toolchain -> ${{ steps.action-under-test-id.outputs.toolchain }} \n env var -> $LLVM_ARM_TOOLCHAIN"
+        echo "outputs.path -> ${{ steps.action-under-test-id.outputs.path }} \n env var -> $LLVM_ARM_PATH"
     - name: Check env var path is correct
-      run: echo "Path $ARM_NONE_EABI_GCC_PATH" | grep -q /home/runner/gcc-arm-none-eabi-7.2017.4-linux/gcc-arm-none-eabi-7-2017-q4-major/bin
+      run: echo "Path $LLVM_ARM_PATH" | grep -q /home/runner/LLVMEmbeddedToolchainForArm-16.0.0-Linux-x86_64/bin
     - name: Check output path is correct
-      run: echo "Path ${{ steps.action-under-test-id.outputs.path }}" | grep -q /home/runner/gcc-arm-none-eabi-7.2017.4-linux/gcc-arm-none-eabi-7-2017-q4-major/bin
+      run: echo "Path ${{ steps.action-under-test-id.outputs.path }}" | grep -q /home/runner/LLVMEmbeddedToolchainForArm-16.0.0-Linux-x86_64/bin
+    - name: Check env var toolchain is correct
+      run: echo "Path $LLVM_ARM_TOOLCHAIN" | grep -q /home/runner/LLVMEmbeddedToolchainForArm-16.0.0-Linux-x86_64
+    - name: Check output toolchain is correct
+      run: echo "Path ${{ steps.action-under-test-id.outputs.toolchain }}" | grep -q /home/runner/LLVMEmbeddedToolchainForArm-16.0.0-Linux-x86_64
+
 
   # Run Action without inputs
   test-default:
@@ -120,13 +96,15 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Ensure the compiler is not present
-      run: '! arm-none-eabi-gcc --version'
-    - name: Set up GCC Arm Compiler with default options
+      run: '! clang --version'
+    - name: Set up LLVM Embedded Toolchain for Arm with default options
       uses: ./
       id: action-under-test-id
     - name: Print out version
-      run: arm-none-eabi-gcc --version
+      run: clang --version
     - name: Check the version matches
-      run: arm-none-eabi-gcc --version | grep -q 12.2.Rel1
+      run: clang --version | grep -q 16.0.0
     - name: Check output path is correct
-      run: echo "${{ steps.action-under-test-id.outputs.path }}" | grep -q /home/runner/gcc-arm-none-eabi-12.2.1-linux/arm-gnu-toolchain-12.2.rel1-x86_64-arm-none-eabi/bin
+      run: echo "${{ steps.action-under-test-id.outputs.path }}" | grep -q /home/runner/LLVMEmbeddedToolchainForArm-16.0.0-Linux-x86_64/bin
+    - name: Check output toolchain is correct
+      run: echo "${{ steps.action-under-test-id.outputs.toolchain }}" | grep -q /home/runner/LLVMEmbeddedToolchainForArm-16.0.0-Linux-x86_64
