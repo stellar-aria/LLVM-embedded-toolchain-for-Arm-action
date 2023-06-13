@@ -31,6 +31,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
+    - uses: "actions/github-script@v6"
+      with:
+        script: |
+          const script = require("./setup.js")
+          script.run()
     - name: Set up LLVM Embedded Toolchain for Arm
       uses: ./
       with:
@@ -59,6 +64,11 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v3
+    - uses: "actions/github-script@v6"
+      with:
+        script: |
+          const script = require("./setup.js")
+          script.run()
     - name: Set up LLVM Embedded Toolchain for Arm with environmental variable
       id: action-under-test-id
       uses: ./
@@ -75,13 +85,13 @@ jobs:
         echo "outputs.toolchain -> ${{ steps.action-under-test-id.outputs.toolchain }} \n env var -> $LLVM_ARM_TOOLCHAIN"
         echo "outputs.path -> ${{ steps.action-under-test-id.outputs.path }} \n env var -> $LLVM_ARM_PATH"
     - name: Check env var path is correct
-      run: echo "Path $LLVM_ARM_PATH" | grep -q /home/runner/LLVMEmbeddedToolchainForArm-16.0.0-Linux-x86_64/bin
+      run: echo "Path $LLVM_ARM_PATH" | grep -q /home/runner/llvm-embedded-toolchain-for-arm-16.0.0-linux/LLVMEmbeddedToolchainForArm-16.0.0-Linux-x86_64/bin
     - name: Check output path is correct
-      run: echo "Path ${{ steps.action-under-test-id.outputs.path }}" | grep -q /home/runner/LLVMEmbeddedToolchainForArm-16.0.0-Linux-x86_64/bin
+      run: echo "Path ${{ steps.action-under-test-id.outputs.path }}" | grep -q /home/runner/llvm-embedded-toolchain-for-arm-16.0.0-linux/LLVMEmbeddedToolchainForArm-16.0.0-Linux-x86_64/bin
     - name: Check env var toolchain is correct
-      run: echo "Path $LLVM_ARM_TOOLCHAIN" | grep -q /home/runner/LLVMEmbeddedToolchainForArm-16.0.0-Linux-x86_64
+      run: echo "Path $LLVM_ARM_TOOLCHAIN" | grep -q /home/runner/llvm-embedded-toolchain-for-arm-16.0.0-linux/LLVMEmbeddedToolchainForArm-16.0.0-Linux-x86_64
     - name: Check output toolchain is correct
-      run: echo "Path ${{ steps.action-under-test-id.outputs.toolchain }}" | grep -q /home/runner/LLVMEmbeddedToolchainForArm-16.0.0-Linux-x86_64
+      run: echo "Path ${{ steps.action-under-test-id.outputs.toolchain }}" | grep -q /home/runner/llvm-embedded-toolchain-for-arm-16.0.0-linux/LLVMEmbeddedToolchainForArm-16.0.0-Linux-x86_64
 
 
   # Run Action without inputs
@@ -90,6 +100,11 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v3
+    - uses: "actions/github-script@v6"
+      with:
+        script: |
+          const script = require("./setup.js")
+          script.run()
     - name: Set up LLVM Embedded Toolchain for Arm with default options
       uses: ./
       id: action-under-test-id
@@ -98,6 +113,6 @@ jobs:
     - name: Check the version matches
       run: clang --version | grep -q 16.0.0
     - name: Check output path is correct
-      run: echo "${{ steps.action-under-test-id.outputs.path }}" | grep -q /home/runner/LLVMEmbeddedToolchainForArm-16.0.0-Linux-x86_64/bin
+      run: echo "${{ steps.action-under-test-id.outputs.path }}" | grep -q /home/runner/llvm-embedded-toolchain-for-arm-16.0.0-linux/LLVMEmbeddedToolchainForArm-16.0.0-Linux-x86_64/bin
     - name: Check output toolchain is correct
-      run: echo "${{ steps.action-under-test-id.outputs.toolchain }}" | grep -q /home/runner/LLVMEmbeddedToolchainForArm-16.0.0-Linux-x86_64
+      run: echo "${{ steps.action-under-test-id.outputs.toolchain }}" | grep -q /home/runner/llvm-embedded-toolchain-for-arm-16.0.0-linux/LLVMEmbeddedToolchainForArm-16.0.0-Linux-x86_64

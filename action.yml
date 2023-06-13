@@ -19,6 +19,8 @@ outputs:
     description: 'Path to the main toolchain folder'
 runs:
   using: 'node16'
+  pre-if: runner.os == 'linux'
+  pre: 'setup.js'
   main: 'dist/index.js'
 branding:
   icon: 'cpu'

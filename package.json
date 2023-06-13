@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stellar-aria/LLVM-embedded-toolchain-for-Arm-action.git"
+    "url": "git+https://github.com/stellar-aria/llvm-embedded-toolchain-for-arm-action.git"
   },
   "keywords": [
     "actions",

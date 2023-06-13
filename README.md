@@ -1,6 +1,6 @@
 # GitHub Action: LLVM Embedded Toolchain for ARM
 
-[![CI](https://github.com/stellar-aria/LLVM-embedded-toolchain-for-Arm-action/actions/workflows/test.yml/badge.svg)](https://github.com/stellar-aria/LLVM-embedded-toolchain-for-Arm-action/workflows/test.yml)
+[![CI](https://github.com/stellar-aria/llvm-embedded-toolchain-for-arm-action/actions/workflows/test.yml/badge.svg)](https://github.com/stellar-aria/llvm-embedded-toolchain-for-arm-action/workflows/test.yml)
 
 This GitHub Action (compatible with Linux, Windows, and macOS platforms)
 downloads, checks, sets up, and caches the LLVM Embbedded Toolchain for Arm.
