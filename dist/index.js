@@ -1,6 +1,62 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 238:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.unmount = exports.mount = void 0;
+const child_process_1 = __nccwpck_require__(2081);
+const util_1 = __nccwpck_require__(3837);
+const exec = (0, util_1.promisify)(child_process_1.exec);
+const volumeRegex = /\/Volumes\/(.*)/m;
+/**
+ * Mount a dmg file and return its mounted path.
+ *
+ * @param {string} path location of .dmg.
+ * @returns {Promise<string>} Promise resolving to the mounted volume path.
+ */
+function mount(path) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { stdout } = yield exec(`hdiutil mount "${path}"`);
+        const match = stdout.match(volumeRegex);
+        if (!match) {
+            throw new Error('Could not extract path out of mount result: ' + stdout);
+        }
+        return match[0];
+    });
+}
+exports.mount = mount;
+/**
+ * Unmount a dmg volume.
+ *
+ * @param {string} path to unmount.
+ * @returns {Promise<void>} Promise resolving when unmount is complete.
+ */
+function unmount(path) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!volumeRegex.test(path)) {
+            throw new Error('Path must contain /Volumes/');
+        }
+        yield exec(`hdiutil unmount "${path}"`);
+    });
+}
+exports.unmount = unmount;
+
+
+/***/ }),
+
 /***/ 3333:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -248,22 +304,16 @@ const path = __importStar(__nccwpck_require__(1017));
 const core = __importStar(__nccwpck_require__(2186));
 const tc = __importStar(__nccwpck_require__(7784));
 const cache = __importStar(__nccwpck_require__(7799));
-const dmg = __importStar(__nccwpck_require__(6847));
 const sha256_file_1 = __importDefault(__nccwpck_require__(8743));
+const dmg = __importStar(__nccwpck_require__(238));
 const llvm = __importStar(__nccwpck_require__(3333));
 function extractDmg(filename, destination) {
-    dmg.mount(filename, (em, mountPath) => {
-        if (em) {
-            core.error(em);
-            return;
-        }
+    return __awaiter(this, void 0, void 0, function* () {
+        const mountPath = yield dmg.mount(filename);
+        //const files = await fs.readdir(mountPath)
         fs.copy(mountPath, destination);
-        dmg.unmount(mountPath, eu => {
-            if (eu) {
-                core.error(eu);
-                return;
-            }
-        });
+        yield dmg.unmount(mountPath);
+        return destination;
     });
 }
 function install(release, platform) {
@@ -327,8 +377,12 @@ function install(release, platform) {
             extractedPath = yield tc.extractTar(llvmDownloadPath, installPath, 'xJ');
         }
         else if (distUrl.endsWith('.dmg')) {
-            extractDmg(llvmDownloadPath, installPath);
-            extractedPath = installPath;
+            try {
+                extractedPath = yield extractDmg(llvmDownloadPath, installPath);
+            }
+            catch (err) {
+                core.error(err);
+            }
         }
         else {
             throw new Error(`Can't decompress ${distUrl}`);
@@ -47428,70 +47482,6 @@ DelayedStream.prototype._checkIfMaxDataSizeExceeded = function() {
     'DelayedStream#maxDataSize of ' + this.maxDataSize + ' bytes exceeded.'
   this.emit('error', new Error(message));
 };
-
-
-/***/ }),
-
-/***/ 6847:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-var exec = (__nccwpck_require__(2081).exec);
-var VOLUME_REGEX = /\/Volumes\/(.*)/m;
-
-/**
- * Mount a dmg file and return its mounted path.
- *
- * @param {String} path location of .dmg.
- * @param {Function} callback [Error err, String mountedVolume].
- */
-function mount(path, callback) {
-  var command = [
-    'hdiutil',
-    'mount',
-    '-nobrowse',
-    '"' + path + '"'
-  ];
-
-  exec(command.join(' '), function(err, stdout, stderr) {
-    if (err) return callback(err);
-
-    // extract volume path
-    var match = stdout.match(VOLUME_REGEX);
-
-    if (!match) {
-      return callback(
-        new Error('could not extract path out of mount result: ' + stdout)
-      );
-    }
-
-    callback(null, match[0]);
-  });
-}
-
-/**
- * Unmount a dmg volume.
- *
- * @param {String} path to unmount.
- * @param {Function} callback [Error err]
- */
-function unmount(path, callback) {
-  if (!VOLUME_REGEX.test(path))
-    throw new Error('path must contain /Volumes/');
-
-  var command = [
-    'hdiutil',
-    'unmount',
-    '"' + path + '"'
-  ];
-
-  exec(command.join(' '), function(err) {
-    if (err) return callback(err);
-    callback();
-  });
-}
-
-module.exports.mount = mount;
-module.exports.unmount = unmount;
 
 
 /***/ }),

@@ -10,8 +10,4 @@
     "useUnknownInCatchVariables": false
   },
   "exclude": ["node_modules", "**/*.test.ts"],
-  "typeRoots": [
-    "./typing",
-    "./node_modules/@types/"
-  ]
 }

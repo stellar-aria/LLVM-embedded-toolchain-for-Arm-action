@@ -5,27 +5,20 @@ import * as path from 'path';
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import * as cache from '@actions/cache';
-import * as dmg from 'dmg';
 import sha256File from 'sha256-file';
 
+import * as dmg from './dmg';
 import * as llvm from './llvm';
 
-function extractDmg(filename: string, destination: string): void {
-  dmg.mount(filename, (em, mountPath) => {
-    if (em) {
-      core.error(em);
-      return;
-    }
+async function extractDmg(filename: string, destination: string): Promise<string> {
+  const mountPath = await dmg.mount(filename);
+  //const files = await fs.readdir(mountPath)
 
-    fs.copy(mountPath, destination);
+  fs.copy(mountPath, destination);
 
-    dmg.unmount(mountPath, eu => {
-      if (eu) {
-        core.error(eu);
-        return;
-      }
-    });
-  });
+  await dmg.unmount(mountPath);
+
+  return destination;
 }
 
 export async function install(release: string, platform: string): Promise<string> {
@@ -92,8 +85,11 @@ export async function install(release: string, platform: string): Promise<string
   } else if (distUrl.endsWith('.tar.xz')) {
     extractedPath = await tc.extractTar(llvmDownloadPath, installPath, 'xJ');
   } else if (distUrl.endsWith('.dmg')) {
-    extractDmg(llvmDownloadPath, installPath);
-    extractedPath = installPath;
+    try {
+      extractedPath = await extractDmg(llvmDownloadPath, installPath);
+    } catch (err) {
+      core.error(err);
+    }
   } else {
     throw new Error(`Can't decompress ${distUrl}`);
   }

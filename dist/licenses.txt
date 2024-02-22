@@ -703,9 +703,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 
-dmg
-MIT
-
 form-data
 MIT
 Copyright (c) 2012 Felix Geisendörfer (felix@debuggable.com) and contributors
