@@ -10,17 +10,6 @@ import sha256File from 'sha256-file';
 import * as dmg from './dmg';
 import * as llvm from './llvm';
 
-async function extractDmg(filename: string, destination: string): Promise<string> {
-  const mountPath = await dmg.mount(filename);
-  //const files = await fs.readdir(mountPath)
-
-  fs.copy(mountPath, destination);
-
-  await dmg.unmount(mountPath);
-
-  return destination;
-}
-
 export async function install(release: string, platform: string): Promise<string> {
   const toolName = 'llvm-embedded-toolchain-for-arm';
 
@@ -86,7 +75,7 @@ export async function install(release: string, platform: string): Promise<string
     extractedPath = await tc.extractTar(llvmDownloadPath, installPath, 'xJ');
   } else if (distUrl.endsWith('.dmg')) {
     try {
-      extractedPath = await extractDmg(llvmDownloadPath, installPath);
+      extractedPath = await dmg.extract(llvmDownloadPath, installPath);
     } catch (err) {
       core.error(err);
     }

@@ -1,5 +1,6 @@
 import {exec as execCallback} from 'child_process';
 import {promisify} from 'util';
+import * as fs from 'fs-extra';
 
 const exec = promisify(execCallback);
 const volumeRegex = /\/Volumes\/(.*)/m;
@@ -33,4 +34,22 @@ export async function unmount(path: string): Promise<void> {
   }
 
   await exec(`hdiutil unmount "${path}"`);
+}
+
+/**
+ * Extract a dmg file
+ *
+ * @param {string} filename to extract
+ * @param {string} destination to extract to
+ * @returns {Promise<string>} destination extracted to
+ */
+export async function extract(filename: string, destination: string): Promise<string> {
+  const mountPath = await mount(filename);
+  //const files = await fs.readdir(mountPath)
+
+  await fs.copy(mountPath, destination);
+
+  await unmount(mountPath);
+
+  return destination;
 }
