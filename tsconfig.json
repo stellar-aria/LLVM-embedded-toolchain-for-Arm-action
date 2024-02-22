@@ -9,5 +9,9 @@
     "esModuleInterop": true,                  /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */
     "useUnknownInCatchVariables": false
   },
-  "exclude": ["node_modules", "**/*.test.ts"]
+  "exclude": ["node_modules", "**/*.test.ts"],
+  "typeRoots": [
+    "./typing",
+    "./node_modules/@types/"
+  ]
 }

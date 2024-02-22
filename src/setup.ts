@@ -1,13 +1,32 @@
-import * as fs from 'fs';
+import * as fs from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 
 import * as core from '@actions/core';
 import * as tc from '@actions/tool-cache';
 import * as cache from '@actions/cache';
+import * as dmg from 'dmg';
 import sha256File from 'sha256-file';
 
 import * as llvm from './llvm';
+
+function extractDmg(filename: string, destination: string): void {
+  dmg.mount(filename, (em, mountPath) => {
+    if (em) {
+      core.error(em);
+      return;
+    }
+
+    fs.copy(mountPath, destination);
+
+    dmg.unmount(mountPath, eu => {
+      if (eu) {
+        core.error(eu);
+        return;
+      }
+    });
+  });
+}
 
 export async function install(release: string, platform: string): Promise<string> {
   const toolName = 'llvm-embedded-toolchain-for-arm';
@@ -70,6 +89,11 @@ export async function install(release: string, platform: string): Promise<string
     extractedPath = await tc.extractZip(llvmDownloadPath, installPath);
   } else if (distUrl.endsWith('.tar.gz')) {
     extractedPath = await tc.extractTar(llvmDownloadPath, installPath);
+  } else if (distUrl.endsWith('.tar.xz')) {
+    extractedPath = await tc.extractTar(llvmDownloadPath, installPath, 'xJ');
+  } else if (distUrl.endsWith('.dmg')) {
+    extractDmg(llvmDownloadPath, installPath);
+    extractedPath = installPath;
   } else {
     throw new Error(`Can't decompress ${distUrl}`);
   }
