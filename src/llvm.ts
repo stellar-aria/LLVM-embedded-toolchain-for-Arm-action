@@ -66,7 +66,18 @@ export function distributionUrl(version: string, platform: string): string {
   if (!versions[version].includes(osName)) {
     throw new Error(`invalid platform ${osName} for version ${version}`);
   }
-  const ext: string = platform === 'win32' ? 'zip' : 'tar.gz';
+
+  let ext: string;
+  if (platform === 'win32') {
+    ext = 'zip'; // All windows releases are zip
+  } else if (semver.satisfies(version, '<=16.0.0')) {
+    ext = 'tar.gz'; // older releases are all GZip
+  } else if (platform == 'darwin') {
+    ext = 'dmg'; // newer macOS are DiskImage
+  } else {
+    ext = 'tar.xz'; // newer releases are XZip
+  }
+
   return baseUrl + `release-${version}/LLVMEmbeddedToolchainForArm-${version}-${osName}.${ext}`;
 }
 
