@@ -1,6 +1,6 @@
 {
   "name": "llvm-embedded-toolchain-for-arm-action",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "GitHub Action to install the LLVM embedded toolchain for Arm",
   "main": "lib/main.js",

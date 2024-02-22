@@ -24,6 +24,7 @@ exports.getSHA256 = exports.distributionUrl = exports.hasDarwin = exports.latest
 const semver_1 = __importDefault(__nccwpck_require__(1383));
 const node_fetch_1 = __importDefault(__nccwpck_require__(467));
 const versions = {
+    '17.0.1': ['Darwin', 'Windows-x86_64', 'Linux-x86_64'],
     '16.0.0': ['Darwin', 'Windows-x86_64', 'Linux-x86_64'],
     '15.0.2': ['Windows-x86_64', 'Linux-x86_64'],
     '14.0.0': ['windows', 'linux'],

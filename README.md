@@ -35,6 +35,7 @@ section.
 ## Available releases
 
 - `latest` <-- Always points to the latest release
+- `17.0.1` (macOS, Windows, Linux)
 - `16.0.0` (macOS, Windows, Linux)
 - `15.0.2` (Windows, Linux)
 - `14.0.0` (Windows, Linux)

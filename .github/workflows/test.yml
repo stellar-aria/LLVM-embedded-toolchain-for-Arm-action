@@ -14,7 +14,7 @@ jobs:
     name: Run tests and build Action
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - run: npm install
     - run: npm run all
 
@@ -27,10 +27,11 @@ jobs:
         release:
           - 'latest'
           - '16.0.0'
+          - '17.0.1'
     name: Test ${{ matrix.release }} @ ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: "actions/github-script@v6"
       with:
         script: |
@@ -63,7 +64,7 @@ jobs:
     name: Test path output and env var
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: "actions/github-script@v6"
       with:
         script: |
@@ -99,7 +100,7 @@ jobs:
     name: Test default options
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: "actions/github-script@v6"
       with:
         script: |
@@ -111,8 +112,8 @@ jobs:
     - name: Print out version
       run: clang --version
     - name: Check the version matches
-      run: clang --version | grep -q 16.0.0
+      run: clang --version | grep -q 17.0.1
     - name: Check output path is correct
-      run: echo "${{ steps.action-under-test-id.outputs.path }}" | grep -q /home/runner/llvm-embedded-toolchain-for-arm-16.0.0-linux/LLVMEmbeddedToolchainForArm-16.0.0-Linux-x86_64/bin
+      run: echo "${{ steps.action-under-test-id.outputs.path }}" | grep -q /home/runner/llvm-embedded-toolchain-for-arm-17.0.1-linux/LLVMEmbeddedToolchainForArm-17.0.1-Linux-x86_64/bin
     - name: Check output toolchain is correct
-      run: echo "${{ steps.action-under-test-id.outputs.toolchain }}" | grep -q /home/runner/llvm-embedded-toolchain-for-arm-16.0.0-linux/LLVMEmbeddedToolchainForArm-16.0.0-Linux-x86_64
+      run: echo "${{ steps.action-under-test-id.outputs.toolchain }}" | grep -q /home/runner/llvm-embedded-toolchain-for-arm-17.0.1-linux/LLVMEmbeddedToolchainForArm-17.0.1-Linux-x86_64
