@@ -116,6 +116,6 @@ jobs:
     - name: Check the version matches
       run: clang --version | grep -q 19.1.1
     - name: Check output path is correct
-      run: echo "${{ steps.action-under-test-id.outputs.path }}" | grep -q /home/runner/llvm-embedded-toolchain-for-arm-17.0.1-linux/LLVMEmbeddedToolchainForArm-17.0.1-Linux-x86_64/bin
+      run: echo "${{ steps.action-under-test-id.outputs.path }}" | grep -q /home/runner/llvm-embedded-toolchain-for-arm-19.1.1-linux/LLVM-ET-Arm-19.1.1-Linux-x86_64/bin
     - name: Check output toolchain is correct
-      run: echo "${{ steps.action-under-test-id.outputs.toolchain }}" | grep -q /home/runner/llvm-embedded-toolchain-for-arm-17.0.1-linux/LLVMEmbeddedToolchainForArm-17.0.1-Linux-x86_64
+      run: echo "${{ steps.action-under-test-id.outputs.toolchain }}" | grep -q /home/runner/llvm-embedded-toolchain-for-arm-19.1.1-linux/LLVM-ET-Arm-19.1.1-Linux-x86_64

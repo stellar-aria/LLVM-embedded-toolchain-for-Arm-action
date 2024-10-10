@@ -11,14 +11,14 @@ inputs:
     required: false
   toolchain-env-var:
     description: 'Name for an environmental variable to be created with the toolchain path.'
-    required: false    
+    required: false
 outputs:
   path:
     description: 'Path to the bin folder with the toolchain executables.'
   toolchain:
     description: 'Path to the main toolchain folder'
 runs:
-  using: 'node16'
+  using: 'node20'
   pre-if: runner.os == 'linux'
   pre: 'setup.js'
   main: 'dist/index.js'
