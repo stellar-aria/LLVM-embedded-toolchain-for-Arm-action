@@ -4,6 +4,8 @@ import semver from 'semver';
 import fetch from 'node-fetch';
 
 const versions: {[llvmRelease: string]: string[]} = {
+  '19.1.1': ['Darwin', 'Windows-x86_64', 'Linux-x86_64'],
+  '18.1.3': ['Darwin', 'Windows-x86_64', 'Linux-x86_64'],
   '17.0.1': ['Darwin', 'Windows-x86_64', 'Linux-x86_64'],
   '16.0.0': ['Darwin', 'Windows-x86_64', 'Linux-x86_64'],
   '15.0.2': ['Windows-x86_64', 'Linux-x86_64'],
@@ -47,7 +49,7 @@ export function distributionUrl(version: string, platform: string): string {
   } else {
     switch (platform) {
       case 'darwin':
-        osName = 'Darwin';
+        osName = semver.satisfies(version, '<=17.0.1') ? 'Darwin' : 'Darwin-universal';
         break;
       case 'linux':
         osName = 'Linux-x86_64';
@@ -78,7 +80,14 @@ export function distributionUrl(version: string, platform: string): string {
     ext = 'tar.xz'; // newer releases are XZip
   }
 
-  return baseUrl + `release-${version}/LLVMEmbeddedToolchainForArm-${version}-${osName}.${ext}`;
+  let filename: string;
+  if (semver.satisfies(version, '<=17.0.1')) {
+    filename = `release-${version}/LLVMEmbeddedToolchainForArm-${version}-${osName}.${ext}`;
+  } else {
+    filename = `release-${version}/LLVM-ET-Arm-${version}-${osName}.${ext}`;
+  }
+
+  return baseUrl + filename;
 }
 
 export async function getSHA256(version: string, platform: string): Promise<string> {
