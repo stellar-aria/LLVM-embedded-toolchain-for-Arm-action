@@ -6,7 +6,7 @@ import * as os from 'os';
 import * as path from 'path';
 import {URL} from 'node:url';
 
-import rimraf from 'rimraf';
+import {rimraf} from 'rimraf';
 import fetch from 'node-fetch';
 
 import * as llvm from '../src/llvm';
@@ -41,7 +41,7 @@ beforeAll(() => {
 
 afterAll(done => {
   if (fs.existsSync(TEMP_LOCAL_PATH)) {
-    rimraf(TEMP_LOCAL_PATH, {disableGlob: true}, function () {
+    rimraf.rimraf(TEMP_LOCAL_PATH, {glob: false}).then(() => {
       done();
     });
   }
@@ -61,10 +61,13 @@ test('test url', () => {
   expect(llvm.distributionUrl('16.0.0', 'darwin')).toStrictEqual(
     'https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-16.0.0/LLVMEmbeddedToolchainForArm-16.0.0-Darwin.tar.gz'
   );
+  expect(llvm.distributionUrl('18.1.3', 'darwin')).toStrictEqual(
+    'https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-18.1.3/LLVM-ET-Arm-18.1.3-Darwin-universal.dmg'
+  );
 });
 
 test('latest points to a known latest release', async () => {
-  const knownLatestRelease = '16.0.0';
+  const knownLatestRelease = '19.1.1';
 
   const latestRelease = llvm.latestVersion();
 

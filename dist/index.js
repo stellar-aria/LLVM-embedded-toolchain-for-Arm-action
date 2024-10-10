@@ -125,8 +125,8 @@ exports.getSHA256 = getSHA256;
 const semver_1 = __importDefault(__nccwpck_require__(2088));
 const node_fetch_1 = __importDefault(__nccwpck_require__(6705));
 const versions = {
-    '19.1.1': ['Darwin', 'Windows-x86_64', 'Linux-x86_64'],
-    '18.1.3': ['Darwin', 'Windows-x86_64', 'Linux-x86_64'],
+    '19.1.1': ['Darwin-universal', 'Windows-x86_64', 'Linux-x86_64'],
+    '18.1.3': ['Darwin-universal', 'Windows-x86_64', 'Linux-x86_64'],
     '17.0.1': ['Darwin', 'Windows-x86_64', 'Linux-x86_64'],
     '16.0.0': ['Darwin', 'Windows-x86_64', 'Linux-x86_64'],
     '15.0.2': ['Windows-x86_64', 'Linux-x86_64'],

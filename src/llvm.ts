@@ -4,8 +4,8 @@ import semver from 'semver';
 import fetch from 'node-fetch';
 
 const versions: {[llvmRelease: string]: string[]} = {
-  '19.1.1': ['Darwin', 'Windows-x86_64', 'Linux-x86_64'],
-  '18.1.3': ['Darwin', 'Windows-x86_64', 'Linux-x86_64'],
+  '19.1.1': ['Darwin-universal', 'Windows-x86_64', 'Linux-x86_64'],
+  '18.1.3': ['Darwin-universal', 'Windows-x86_64', 'Linux-x86_64'],
   '17.0.1': ['Darwin', 'Windows-x86_64', 'Linux-x86_64'],
   '16.0.0': ['Darwin', 'Windows-x86_64', 'Linux-x86_64'],
   '15.0.2': ['Windows-x86_64', 'Linux-x86_64'],
